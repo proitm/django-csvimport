@@ -1,4 +1,4 @@
-""" Developed for www.heliosfoundation.org by Ed Crewe and Tom Dunham 
+""" Developed for www.heliosfoundation.org by Ed Crewe and Tom Dunham
     Django command to import CSV files
 """
 import os, csv, re
@@ -6,7 +6,8 @@ from datetime import datetime
 import codecs
 import chardet
 
-from django.db import DatabaseError
+from django.db import DatabaseError, transaction
+from django.contrib.gis.geos import Point
 from django.core.exceptions import ObjectDoesNotExist
 from django.core.management.base import LabelCommand, BaseCommand
 from optparse import make_option
@@ -82,7 +83,7 @@ class Command(LabelCommand, CSVParser):
                                    (column1=field1(ForeignKey|field),column2=field2(ForeignKey|field), ...)
                                    for the import (use none for no names -> col_#)'''),
                make_option('--defaults', default='',
-                           help='''Provide comma separated defaults for the import 
+                           help='''Provide comma separated defaults for the import
                                    (field1=value,field3=value, ...)'''),
                make_option('--model', default='iisharing.Item',
                            help='Please provide the model to import to'),
@@ -181,7 +182,7 @@ class Command(LabelCommand, CSVParser):
         self.nameindexes = bool(nameindexes)
         self.file_name = csvfile
         self.deduplicate = deduplicate
-        return 
+        return
 
     def run(self, logid=0):
         """ Run the csvimport """
@@ -232,7 +233,7 @@ class Command(LabelCommand, CSVParser):
                 if self.debug:
                     loglist.append('%s.%s = "%s"' % (self.model.__name__,
                                                           field, row[column]))
-                try:    
+                try:
                     row[column] = self.type_clean(field, row[column], loglist, i)
                 except:
                     pass
@@ -274,7 +275,8 @@ class Command(LabelCommand, CSVParser):
             try:
                 importing_csv.send(sender=model_instance,
                                    row=dict(zip(self.csvfile[:1][0], row)))
-                model_instance.save()
+                with transaction.atomic():
+                    model_instance.save()
                 imported_csv.send(sender=model_instance,
                                   row=dict(zip(self.csvfile[:1][0], row)))
             except DatabaseError as err:
@@ -300,7 +302,7 @@ class Command(LabelCommand, CSVParser):
         rowcount = self.model.objects.count() - rowcount
         countmsg = 'Imported %s rows to %s' % (rowcount, self.model.__name__)
         if CSVIMPORT_LOG == 'logger':
-            logger.info(countmsg)            
+            logger.info(countmsg)
         if self.loglist:
             self.loglist.append(countmsg)
             self.props = {'file_name':self.file_name,
@@ -371,6 +373,9 @@ class Command(LabelCommand, CSVParser):
             else:
                 # loglist.append('row %s: Column %s = %s not date format' % (i, field, value))
                 value = None
+        if field_type == 'PointField':
+            value = map(float, value.split(' '))[::-1]
+            value = Point(*value)
         return value
 
     def parse_header(self, headlist):
