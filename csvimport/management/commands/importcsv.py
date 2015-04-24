@@ -11,6 +11,7 @@ from django.contrib.gis.geos import Point
 from django.core.exceptions import ObjectDoesNotExist
 from django.core.management.base import LabelCommand, BaseCommand
 from optparse import make_option
+from psycopg2.extras import NumericRange
 from django.db import models
 from django.contrib.contenttypes.models import ContentType
 
@@ -376,6 +377,9 @@ class Command(LabelCommand, CSVParser):
         if field_type == 'PointField':
             value = map(float, value.split(' '))[::-1]
             value = Point(*value)
+        if field_type == 'FloatRangeField':
+            value = map(float, value.split(' '))
+            value = NumericRange(*value)
         return value
 
     def parse_header(self, headlist):
