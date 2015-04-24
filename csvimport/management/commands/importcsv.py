@@ -424,12 +424,8 @@ class Command(LabelCommand, CSVParser):
         #TODO fix to find related field name rather than assume second field
         if not key.endswith('_id'):
             if field.__class__ == models.ForeignKey:
-                try:
-                    key += '(%s|%s)' % (field.related.parent_model.__name__,
-                                        field.related.parent_model._meta.fields[1].name,)
-                except AttributeError:
-                    key += '(%s|%s)' % (field.related.model.__name__,
-                                        field.related.model._meta.fields[1].name,)
+                key += '(%s|%s)' % (field.related.model.__name__,
+                                    field.related.model._meta.fields[1].name,)
         return key
 
     def error(self, message, type=1):
