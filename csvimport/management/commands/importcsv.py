@@ -213,7 +213,8 @@ class Command(LabelCommand, CSVParser):
                 loglist.append(warn)
             return loglist
         # count before import
-        rowcount = self.model.objects.count()
+        with transaction.atomic():
+            rowcount = self.model.objects.count()
         for i, row in enumerate(self.csvfile[self.start:]):
             if CSVIMPORT_LOG == 'logger':
                 logger.info("Import %s %i", self.model.__name__, counter)
@@ -300,7 +301,8 @@ class Command(LabelCommand, CSVParser):
             self.loglist.extend(loglist)
             loglist = []
         # count after import
-        rowcount = self.model.objects.count() - rowcount
+        with transaction.atomic():
+            rowcount = self.model.objects.count() - rowcount
         countmsg = 'Imported %s rows to %s' % (rowcount, self.model.__name__)
         if CSVIMPORT_LOG == 'logger':
             logger.info(countmsg)
