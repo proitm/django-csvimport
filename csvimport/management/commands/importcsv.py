@@ -379,7 +379,7 @@ class Command(LabelCommand, CSVParser):
             value = Point(*value)
         if field_type == 'FloatRangeField':
             value = map(float, value.split(' '))
-            value = NumericRange(*value)
+            value = NumericRange(*value, bounds='[]')
         return value
 
     def parse_header(self, headlist):
