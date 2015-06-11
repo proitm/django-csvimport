@@ -229,7 +229,7 @@ class Command(LabelCommand, CSVParser):
                 else:
                     column = int(column)-1
 
-                if foreignkey:
+                if foreignkey and row[column]:
                     row[column] = self.insert_fkey(foreignkey, row[column])
 
                 if self.debug:
