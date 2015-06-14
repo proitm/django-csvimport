@@ -379,6 +379,8 @@ class Command(LabelCommand, CSVParser):
         if field_type == 'PointField' and value:
             value = map(float, value.split(' '))[::-1]
             value = Point(*value)
+        if not value:
+            value = None
         if field_type == 'FloatRangeField' and value:
             value = map(float, value.split(' '))
             value = NumericRange(*value, bounds='[]')
