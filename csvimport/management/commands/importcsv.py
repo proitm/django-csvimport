@@ -421,9 +421,7 @@ class Command(LabelCommand, CSVParser):
                                                  rowcol})
 
             if not matches:
-                key = fk_model()
-                key.__setattr__(fk_field, rowcol)
-                key.save()
+                return None
 
             rowcol = fk_model.objects.filter(**{fk_field+'__exact': rowcol})[0]
         return rowcol
