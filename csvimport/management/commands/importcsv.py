@@ -153,7 +153,10 @@ class Command(LabelCommand, CSVParser):
         if modelname.find('.') > -1:
             app_label, model = modelname.split('.')
         if uploaded:
-            self.csvfile = self.open_csvfile(uploaded.path)
+            if hasattr(uploaded, 'path'):
+                self.csvfile = self.open_csvfile(uploaded.path)
+            else:
+                self.csvfile = self.open_csvfile(uploaded)
         else:
             failed = self.check_filesystem(csvfile)
             if failed:
