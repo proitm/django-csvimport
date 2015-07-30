@@ -223,7 +223,7 @@ class Command(LabelCommand, CSVParser):
                 logger.info("Import %s %i", self.model.__name__, counter)
             counter += 1
 
-            model_instance = self.model()
+            model_instance, tm = self.model.objects.get_or_create(row[0])
             model_instance.csvimport_id = csvimportid
 
             for (column, field, foreignkey) in self.mappings:
